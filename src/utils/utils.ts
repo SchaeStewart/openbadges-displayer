@@ -80,6 +80,26 @@ export async function unbakeBadge(badgeUrl: string): Promise<string> {
     return { keyword, text };
   };
 
+  const gettEXt = chunk => {
+    let i = 0;
+    const bytes = chunk.data;
+    while (i < bytes.length) {
+      if (bytes[i] == 0) {
+        const keyword = bytes
+          .slice(0, i)
+          .reduce((acc, str) => `${acc}${String.fromCharCode(str)}`, "");
+        const text = bytes
+          .slice(i + 1)
+          .reduce((acc, str) => `${acc}${String.fromCharCode(str)}`, "");
+        return { keyword, text };
+      }
+      i++;
+    }
+  };
+
+  const tEXt = chunks.filter(chunk => chunk.type === "tEXt");
+  console.log(tEXt.map(gettEXt));
+
   console.log(iTXt.map(getiTXt));
 
   return "";
