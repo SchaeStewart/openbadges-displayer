@@ -20,9 +20,9 @@ export async function unbakeBadge(badgeUrl: string): Promise<string> {
     }
   };
 
-  const getChunks = (byteoffset, buffer: ArrayBuffer) => {
+  const getChunks = (byteoffset, buffer: ArrayBuffer): Array<any> => {
     if (byteoffset >= buffer.byteLength) {
-      return;
+      return [];
     }
 
     const data = new DataView(buffer);
@@ -32,15 +32,15 @@ export async function unbakeBadge(badgeUrl: string): Promise<string> {
       (acc, val) => `${acc}${String.fromCharCode(val)}`,
       ""
     );
-    const chunkData = new Uint8Array(buffer, byteoffset, chunkLength);
+    const chunkData = new Uint8Array(buffer, byteoffset + 8, chunkLength);
 
     // TODO: probably check the CRC?
-
-    console.log({ chunkLength, chunkType, chunkData });
-
     // Each chunk has 4 bytes for length, 4 bytes for type, 4 bytes for crc, and then X bytes for data
     const totalChunkLength = chunkLength + 12;
-    getChunks(byteoffset + totalChunkLength, buffer);
+    return [
+      ...getChunks(byteoffset + totalChunkLength, buffer),
+      { data: chunkData, type: chunkType }
+    ];
   };
 
   const imgBuffer = await fetch(
@@ -49,7 +49,38 @@ export async function unbakeBadge(badgeUrl: string): Promise<string> {
 
   ensurePNGsignature(imgBuffer, PNG_SIGNATURE);
 
-  getChunks(PNG_SIGNATURE.length, imgBuffer);
+  const chunks = getChunks(PNG_SIGNATURE.length, imgBuffer);
+  // TODO: error check and ensure last and first chunks are IHDR and IEND
+
+  const iTXt = chunks.filter(chunk => chunk.type === "iTXt");
+  const getiTXt = chunk => {
+    // TODO: clean this up. Make more functional. Handle compression flag
+    let nullsEncountered = 0;
+    let i = 0;
+    let bytes = chunk.data;
+    let keyword: string;
+    let text: string;
+    while (i < bytes.length) {
+      if (bytes[i] == 0 && nullsEncountered == 0) {
+        keyword = bytes
+          .slice(0, i)
+          .reduce((acc, val) => `${acc}${String.fromCharCode(val)}`, "");
+        nullsEncountered++;
+      } else if (bytes[i] == 0 && nullsEncountered == 4) {
+        // Why is this 4? Because the compression flag is 0 for uncompressed which was probably screwwing with this logic?
+        text = bytes
+          .slice(i + 1)
+          .reduce((acc, val) => `${acc}${String.fromCharCode(val)}`, "");
+        break;
+      } else if (bytes[i] == 0) {
+        nullsEncountered++;
+      }
+      i++;
+    }
+    return { keyword, text };
+  };
+
+  console.log(iTXt.map(getiTXt));
 
   return "";
 }
