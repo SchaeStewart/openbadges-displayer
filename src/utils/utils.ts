@@ -1,3 +1,15 @@
+interface Chunk {
+  data: Uint8Array;
+  type: string;
+}
+
+interface iTXt {
+  keyword: string;
+  text: string;
+}
+
+// TODO: interface for badge data
+
 export async function unbakeBadge(badgeUrl: string): Promise<object> {
   const arrayToStr = (acc: string, val: number): string =>
     `${acc}${String.fromCharCode(val)}`;
@@ -18,7 +30,7 @@ export async function unbakeBadge(badgeUrl: string): Promise<object> {
     }
   };
 
-  const getChunks = (byteoffset, buffer: ArrayBuffer): Array<any> => {
+  const getChunks = (byteoffset: number, buffer: ArrayBuffer): Array<Chunk> => {
     // TODO: error check and ensure last and first chunks are IHDR and IEND
     if (byteoffset >= buffer.byteLength) {
       return [];
@@ -41,12 +53,12 @@ export async function unbakeBadge(badgeUrl: string): Promise<object> {
     ];
   };
 
-  const getiTXt = chunks => {
+  const getiTXt = (chunks: Array<Chunk>): Array<iTXt> => {
     return chunks
       .filter(chunk => chunk.type === "iTXt")
-      .map(chunk => {
-        // TODO: Handle compression flag
-        return chunk.data.reduce(
+      .map(chunk =>
+        chunk.data.reduce(
+          // TODO: Handle compression flag: Section 4.2.3.3 http://www.libpng.org/pub/png/spec/1.2/PNG-Chunks.html
           (acc, byte, i, bytes) => {
             if (byte === 0 && acc.nullsEncountered === 0) {
               return {
@@ -71,8 +83,8 @@ export async function unbakeBadge(badgeUrl: string): Promise<object> {
             }
           },
           { keyword: "", text: "", nullsEncountered: 0 }
-        );
-      });
+        )
+      );
   };
 
   // const tEXt = chunks.filter(chunk => chunk.type === "tEXt");
@@ -95,8 +107,10 @@ export async function unbakeBadge(badgeUrl: string): Promise<object> {
 
   const imgBuffer = await fetch(
     `https://cors-anywhere.herokuapp.com/${badgeUrl}`
-  ).then(res => res.arrayBuffer()); //TODO: don't use CORS anywhere
+  ).then(res => res.arrayBuffer()); //TODO: handle cors
+
   ensurePNGsignature(imgBuffer, PNG_SIGNATURE);
+
   const chunks = getChunks(PNG_SIGNATURE.length, imgBuffer);
   return getiTXt(chunks)
     .filter(chunk => chunk.keyword === "openbadges")
