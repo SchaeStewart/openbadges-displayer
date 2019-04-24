@@ -45,26 +45,33 @@ export async function unbakeBadge(badgeUrl: string): Promise<object> {
     return chunks
       .filter(chunk => chunk.type === "iTXt")
       .map(chunk => {
-        // TODO: clean this up. Make more functional. Handle compression flag
-        let nullsEncountered = 0;
-        let i = 0;
-        let bytes = chunk.data;
-        let keyword: string;
-        let text: string;
-        while (i < bytes.length) {
-          if (bytes[i] == 0 && nullsEncountered == 0) {
-            keyword = bytes.slice(0, i).reduce(arrayToStr, "");
-            nullsEncountered++;
-          } else if (bytes[i] == 0 && nullsEncountered == 4) {
-            // Why is this 4? Because the compression flag is 0 for uncompressed which was probably screwwing with this logic?
-            text = bytes.slice(i + 1).reduce(arrayToStr, "");
-            break;
-          } else if (bytes[i] == 0) {
-            nullsEncountered++;
-          }
-          i++;
-        }
-        return { keyword, text };
+        // TODO: Handle compression flag
+        return chunk.data.reduce(
+          (acc, byte, i, bytes) => {
+            if (byte === 0 && acc.nullsEncountered === 0) {
+              return {
+                ...acc,
+                nullsEncountered: acc.nullsEncountered + 1,
+                keyword: bytes.slice(0, i).reduce(arrayToStr, "")
+              };
+            } else if (byte === 0 && acc.nullsEncountered === 4) {
+              bytes.slice(1); // a hack to force an early return
+              return {
+                ...acc,
+                nullsEncountered: undefined,
+                text: bytes.slice(i + 1).reduce(arrayToStr, "")
+              };
+            } else if (byte === 0) {
+              return {
+                ...acc,
+                nullsEncountered: acc.nullsEncountered + 1
+              };
+            } else {
+              return acc;
+            }
+          },
+          { keyword: "", text: "", nullsEncountered: 0 }
+        );
       });
   };
 
