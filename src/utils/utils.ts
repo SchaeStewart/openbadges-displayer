@@ -94,12 +94,10 @@ export async function unbakeBadge(badgeUrl: string): Promise<object> {
 
   const imgBuffer = await fetch(
     `https://cors-anywhere.herokuapp.com/${badgeUrl}`
-  ).then(res => res.arrayBuffer());
+  ).then(res => res.arrayBuffer()); //TODO: don't use CORS anywhere
   ensurePNGsignature(imgBuffer, PNG_SIGNATURE);
   const chunks = getChunks(PNG_SIGNATURE.length, imgBuffer);
   return getiTXt(chunks)
     .filter(chunk => chunk.keyword === "openbadges")
-    .map(chunk => ({
-      text: JSON.parse(chunk.text)
-    }))[0]; // TODO: in future ensure there is only ever 1 openbadge iTXt
+    .map(chunk => JSON.parse(chunk.text))[0]; // TODO: in future ensure there is only ever 1 openbadge iTXt
 }
