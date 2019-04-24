@@ -1,9 +1,3 @@
-export function format(first: string, middle: string, last: string): string {
-  return (
-    (first || "") + (middle ? ` ${middle}` : "") + (last ? ` ${last}` : "")
-  );
-}
-
 export async function unbakeBadge(badgeUrl: string): Promise<object> {
   const arrayToStr = (acc: string, val: number): string =>
     `${acc}${String.fromCharCode(val)}`;
