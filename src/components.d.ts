@@ -12,58 +12,42 @@ import '@stencil/core';
 
 export namespace Components {
 
-  interface MyComponent {
+  interface OpenbadgeDisplayer {
     /**
-    * The first name
+    * The openbadge image
     */
-    'first': string;
-    /**
-    * The last name
-    */
-    'last': string;
-    /**
-    * The middle name
-    */
-    'middle': string;
+    'src': string;
   }
-  interface MyComponentAttributes extends StencilHTMLAttributes {
+  interface OpenbadgeDisplayerAttributes extends StencilHTMLAttributes {
     /**
-    * The first name
+    * The openbadge image
     */
-    'first'?: string;
-    /**
-    * The last name
-    */
-    'last'?: string;
-    /**
-    * The middle name
-    */
-    'middle'?: string;
+    'src'?: string;
   }
 }
 
 declare global {
   interface StencilElementInterfaces {
-    'MyComponent': Components.MyComponent;
+    'OpenbadgeDisplayer': Components.OpenbadgeDisplayer;
   }
 
   interface StencilIntrinsicElements {
-    'my-component': Components.MyComponentAttributes;
+    'openbadge-displayer': Components.OpenbadgeDisplayerAttributes;
   }
 
 
-  interface HTMLMyComponentElement extends Components.MyComponent, HTMLStencilElement {}
-  var HTMLMyComponentElement: {
-    prototype: HTMLMyComponentElement;
-    new (): HTMLMyComponentElement;
+  interface HTMLOpenbadgeDisplayerElement extends Components.OpenbadgeDisplayer, HTMLStencilElement {}
+  var HTMLOpenbadgeDisplayerElement: {
+    prototype: HTMLOpenbadgeDisplayerElement;
+    new (): HTMLOpenbadgeDisplayerElement;
   };
 
   interface HTMLElementTagNameMap {
-    'my-component': HTMLMyComponentElement
+    'openbadge-displayer': HTMLOpenbadgeDisplayerElement
   }
 
   interface ElementTagNameMap {
-    'my-component': HTMLMyComponentElement;
+    'openbadge-displayer': HTMLOpenbadgeDisplayerElement;
   }
 
 
