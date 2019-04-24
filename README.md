@@ -6,6 +6,12 @@ A [web component](https://developer.mozilla.org/en-US/docs/Web/Web_Components) f
 
 This project is being written in [Stencil](https://stenciljs.com/) and is still a work in progress. For Stencil related commands and docs see [here](./stencil_readme.md)
 
+## How to run
+
+Clone the project and `cd` into it
+
+Run `npm install` then `npm start`
+
 ## TODO
 
 - [ ] Clean up unbakeBadge function in utils.ts. Fix the type annotations
