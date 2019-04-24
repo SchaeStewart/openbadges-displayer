@@ -1,8 +1,6 @@
 import { Component, Prop, State } from "@stencil/core";
 import { unbakeBadge } from "../../utils/utils";
 
-// https://media.us.badgr.io/uploads/badges/assertion-fK9hiougS7SsVaSoCw1cZg.png
-
 @Component({
   tag: "openbadge-displayer",
   //   styleUrl: "my-component.css",
@@ -15,15 +13,16 @@ export class OpenBadge {
   @Prop() src: string;
 
   @State() badge: object;
+  @State() badgeDescription: string;
 
   async componentDidLoad() {
     this.badge = await unbakeBadge(this.src);
+    this.getBadgeInformation(this.badge);
   }
 
   private async getBadgeInformation(badge: any) {
-    const badgeData = await fetch(badge.badge).then(data => data.json());
-    console.log(badgeData);
-    return badgeData;
+    const badgeInfo = await fetch(badge.badge).then(data => data.json());
+    this.badgeDescription = badgeInfo.description;
   }
 
   render() {
@@ -31,8 +30,7 @@ export class OpenBadge {
       <div>
         <img src={this.src} />
         <span>{this.badge}</span>
-        <span>{this.badge && this.getBadgeInformation(this.badge)}</span>
-        {/* TODO: pickup here. what data to get from badge */}
+        <span>Description: {this.badgeDescription}</span>
       </div>
     );
   }
