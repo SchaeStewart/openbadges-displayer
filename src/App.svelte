@@ -3,7 +3,8 @@
   import { onMount } from "svelte";
 
   export let src: string;
-  let badge = {} // TODO: type for badge
+  let badge = {} // TODO: pickup here. Create type definitions for badge
+  // https://www.imsglobal.org/sites/default/files/Badges/OBv2p0Final/examples/index.html#Assertion
 
   async function customOnLoad() {
     try {
